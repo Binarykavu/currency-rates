@@ -1,0 +1,26 @@
+name: Update Currency Rates
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Runs once per day (midnight UTC)
+  workflow_dispatch:      # Allows manual run
+
+jobs:
+  update-rates:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Fetch exchange rates
+        run: |
+          curl -s "https://open.er-api.com/v6/latest/USD" > rates.json
+
+      - name: Commit updated rates
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add rates.json
+          git commit -m "Auto update currency rates" || echo "No changes"
+          git push
